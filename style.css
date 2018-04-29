@@ -1,0 +1,31 @@
+/*  скидання налаштувань браузера */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    width: 100%;
+    height: 100vh;
+}
+
+.svg-editor {
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+.svg-editor svg {
+    width: 100%;
+    height: 100%;
+}
+
+.svg-editor polygon {
+    fill: rgb(110, 207, 163);
+    stroke: rgb(248, 186, 48);
+    stroke-width:2;
+}
+
+.svg-editor circle {
+    fill: rgb(240, 75, 116);
+}

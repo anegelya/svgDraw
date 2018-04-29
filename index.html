@@ -3,71 +3,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            width: 100%;
-            height: 100vh;
-        }
-
-        body svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        body polygon {
-            fill: rgb(110, 207, 163);
-            stroke: rgb(248, 186, 48);
-        }
-
-        body circle {
-            fill: rgb(240, 75, 116);
-        }
-    </style>
+    <title>SVG editor</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <svg version="1.1" 
-         baseProfile="full" 
-         xmlns="http://www.w3.org/2000/svg" 
-         width="100%" 
-         height="100%">
-        <polygon points="" 
-                 style="stroke-width:2" />
-   </svg>
+    <div class="svg-editor"></div>
 </body>
-    <script>
-        var polygon = document.querySelector('svg polygon');
-        var poly = [];
-
-        document.body.addEventListener('click', function(e) {
-            var x = e.clientX;
-            var y = e.clientY;
-
-            poly.push({
-                'x': x,
-                'y': y});
-
-            console.log(poly);
-
-            var polyPoints = "";
-            poly.forEach(elem => {
-                polyPoints += elem.x + ',' + elem.y + ' ';
-            });
-
-            var dot = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
-            dot.setAttribute('cx', x);
-            dot.setAttribute('cy', y);
-            dot.setAttribute('r', "2");
-
-            polygon.parentElement.appendChild(dot);
-
-            polygon.setAttribute("points", polyPoints);
-            console.log(polyPoints);
-        });
-    </script>
+<script src="main.js"></script>
+<script>
+    var svgEditor = new SVGEditor(document.querySelector('.svg-editor'));
+</script>
 </html>
