@@ -49,6 +49,12 @@ function SVGEditor(DOM, options) {
             polygon = null;
         }
     });
+
+    document.addEventListener('keydown', function(event) {
+        if(event.keyCode ==90 && event.metaKey) {
+            console.log("Відміна");
+        }
+    });
 }
 
 // абстрактний конструктор Полігону
@@ -69,6 +75,13 @@ function Polygon(parentElem) {
         var dot = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
         dot.setAttribute('r', "2");
         parentElem.appendChild(dot);
+
+        dot.addEventListener('click', function(event){
+            if(event.metaKey) {
+                event.stopPropagation();
+                console.log('hi');
+            }
+        });
 
         this.setCoords = function(coords) {
             dot.setAttribute('cx', coords.x);
