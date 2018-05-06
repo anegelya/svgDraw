@@ -16,7 +16,7 @@ body {
 }
 
 .svg-editor.cursor {
-    cursor: move;
+    cursor: initial;
 }
 
 .svg-editor svg {
