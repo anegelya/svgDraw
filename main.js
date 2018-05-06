@@ -1,4 +1,5 @@
-// TODO: додати поля, які б додавали дата-атрибути до полігонів
+// TODO:
+
 // абстрактний конструктор Редактору SVG
 function SVGEditor(DOM, options) {
     // створюємо полотно для малювання SVG
@@ -15,6 +16,9 @@ function SVGEditor(DOM, options) {
     // додаємо полотно до DOM
     DOM.appendChild(canvas);
 
+    // стоворюємо нову форму дата-атрибутів
+    var form = new Form(DOM);
+
     // додаємо слухач на клік
     canvas.addEventListener('click', function(event) {
         event.stopPropagation();
@@ -30,6 +34,7 @@ function SVGEditor(DOM, options) {
 
             // створюємо один полігон на полотні
             polygon = new Polygon(canvas);
+            form.setPolygonTarget(polygon);
 
             // додаємо до нього нову точку в місці кліку
             polygon.addPoint(coords);
@@ -43,6 +48,7 @@ function SVGEditor(DOM, options) {
                     if(elem.getAttribute('points') === polygonElem.getPolygonCoords()) {
                         polygon = polygonElem;
                         polygon.makeActive();
+                        form.setPolygonTarget(polygon);
                     }
                 });
             }
@@ -297,6 +303,10 @@ function Polygon(parentElem) {
         return result;
     }
 
+    this.editAttribute = function(attribute, value) {
+        polygon.setAttribute(attribute, value);
+    }
+
     function approxPoint(coords, x1, y1) {
         var polygonPoints = "",
             x = coords.x,
@@ -342,7 +352,7 @@ function Polygon(parentElem) {
 // абстрактний конструктор Точки
 function Dot(parentElem) {
     var dot = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
-    dot.setAttribute('r', "5");
+    dot.setAttribute('r', "4");
     parentElem.appendChild(dot);
 
     this.getCoords = function() {
@@ -363,4 +373,28 @@ function Dot(parentElem) {
     this.delete = function() {
         dot.remove();
     }
+}
+
+// абстрактний конструктор Форми дата-атрибутів
+function Form(parentElem) {
+    var form = document.createElement('form');
+    var input = document.createElement('input');
+
+    var polygonTarget = null;
+    
+    input.setAttribute('type', 'text');
+    form.appendChild(input);
+    parentElem.appendChild(form);
+
+    this.setPolygonTarget = function(polygon) {
+        polygonTarget = polygon;
+        console.log(polygonTarget);
+    }
+
+    input.addEventListener('keypress', function(event) {
+        if(polygonTarget) {
+            var value = event.target.value;
+            polygonTarget.editAttribute('data-v', value);
+        }
+    });
 }
