@@ -1,3 +1,4 @@
+// TODO: додати поля, які б додавали дата-атрибути до полігонів
 // абстрактний конструктор Редактору SVG
 function SVGEditor(DOM, options) {
     // створюємо полотно для малювання SVG
@@ -15,7 +16,7 @@ function SVGEditor(DOM, options) {
     DOM.appendChild(canvas);
 
     // додаємо слухач на клік
-    DOM.addEventListener('click', function(event) {
+    canvas.addEventListener('click', function(event) {
         event.stopPropagation();
 
         // отримуємо координати кліку
@@ -54,7 +55,7 @@ function SVGEditor(DOM, options) {
         }
     });
 
-    DOM.addEventListener('mousedown', function(event){
+    canvas.addEventListener('mousedown', function(event){
         event.stopPropagation();
         event.preventDefault();
 
@@ -75,7 +76,7 @@ function SVGEditor(DOM, options) {
         }
     });
 
-    DOM.addEventListener('mouseup', function(event) {
+    canvas.addEventListener('mouseup', function(event) {
         event.stopPropagation();
         event.preventDefault();
 
@@ -85,7 +86,7 @@ function SVGEditor(DOM, options) {
         }
     });
     
-    DOM.addEventListener('mousemove', function(event) {
+    canvas.addEventListener('mousemove', function(event) {
         event.preventDefault();
         event.stopPropagation();
         var coords = {
@@ -104,7 +105,7 @@ function SVGEditor(DOM, options) {
         }
     });
 
-    DOM.addEventListener('contextmenu', function(event){
+    canvas.addEventListener('contextmenu', function(event){
         event.preventDefault();
         if(polygon) {
             polygon.stopDraw();
