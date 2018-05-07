@@ -1,9 +1,15 @@
 // TODO:
+// FIXME: коли нажати cmd, клікнути по полігону і почати одразу рухати - то остання точка стає чорновою. 
+// має додаватись ще одна нова чорнова точка
 
 // абстрактний конструктор Редактору SVG
 function SVGEditor(DOM, options) {
+
     // створюємо полотно для малювання SVG
     var canvas = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+    canvas.style.width = options.width;
+    canvas.style.height = options.height;
+    canvas.style.background = 'url(' + options.url + ')';
 
     // створюємо поточний елемент, який буде малюватись
     var polygon = null;
@@ -16,8 +22,11 @@ function SVGEditor(DOM, options) {
     // додаємо полотно до DOM
     DOM.appendChild(canvas);
 
-    // стоворюємо нову форму дата-атрибутів
-    var form = new Form(DOM);
+    // створюємо нову форму дата-атрибутів
+    var form = new Form(DOM, options.fields);
+
+    // створюємо форму експорту полотна
+    var exportForm = new ExportForm(DOM, polygons);
 
     // додаємо слухач на клік
     canvas.addEventListener('click', function(event) {
@@ -36,12 +45,19 @@ function SVGEditor(DOM, options) {
             polygon = new Polygon(canvas);
             form.setPolygonTarget(polygon);
 
+            options.fields.forEach(field => {
+                if(polygon) {
+                    polygon.editAttribute(field.attribute, '1');
+                }
+            });
+
             // додаємо до нього нову точку в місці кліку
             polygon.addPoint(coords);
             polygons.push(polygon);
 
         } else if (event.metaKey) {
             var elem = event.target;
+            // polygon.stopDraw();
 
             if(elem.nodeName == 'polygon') {
                 polygons.forEach(polygonElem => {
@@ -53,7 +69,6 @@ function SVGEditor(DOM, options) {
                 });
             }
         } else if(event.shiftKey) {
-
             // додаємо точку із апроксимованими кутами
             polygon.addPoint(coords, true);
         } else {
@@ -88,7 +103,7 @@ function SVGEditor(DOM, options) {
 
         if(event.metaKey) {
             editablePoint = null;
-            polygon.nullDot();
+            if(polygon) polygon.nullDot();
         }
     });
     
@@ -150,6 +165,8 @@ function Polygon(parentElem) {
     
     // створюємо масив із координатами точок полігону;
     var polygonCoords = [];
+
+    var attributes = {};
 
     var editablePoint = null;
 
@@ -305,6 +322,20 @@ function Polygon(parentElem) {
 
     this.editAttribute = function(attribute, value) {
         polygon.setAttribute(attribute, value);
+        attributes[attribute] = value;
+    }
+
+    this.seeAttribute = function(attribute) {
+        return polygon.getAttribute(attribute);
+    }
+
+    this.export = function() {
+        var obj = {};
+
+        obj.coords = polygonCoords;
+        obj.attributes = attributes;
+
+        return obj;
     }
 
     function approxPoint(coords, x1, y1) {
@@ -375,26 +406,72 @@ function Dot(parentElem) {
     }
 }
 
-// абстрактний конструктор Форми дата-атрибутів
-function Form(parentElem) {
+// абстрактний конструктор Форми зміни дата-атрибутів
+function Form(parentElem, fields) {
     var form = document.createElement('form');
-    var input = document.createElement('input');
 
     var polygonTarget = null;
+
+    var fieldsArr = [];
+    var update = new Event('update');
+
+    fields.forEach(field => {
+        var input = document.createElement('input');
+        input.setAttribute('type', 'text');
+        input.setAttribute('placeholder', field.name);
+        input.setAttribute('id', field.attribute);
+
+        form.appendChild(input);
+        fieldsArr.push(input);
+
+        input.addEventListener('keyup', function(event) {
+            if(polygonTarget) {
+                var value = event.target.value;
+                polygonTarget.editAttribute(field.attribute, value);
+            }
+        });
+
+        input.addEventListener('update', function(event) {
+            if(polygonTarget) {
+                input.value = polygonTarget.seeAttribute(field.attribute);
+            }
+        });
+    });
     
-    input.setAttribute('type', 'text');
-    form.appendChild(input);
     parentElem.appendChild(form);
 
     this.setPolygonTarget = function(polygon) {
         polygonTarget = polygon;
-        console.log(polygonTarget);
-    }
 
-    input.addEventListener('keypress', function(event) {
-        if(polygonTarget) {
-            var value = event.target.value;
-            polygonTarget.editAttribute('data-v', value);
+        fieldsArr.forEach(item => {
+            item.dispatchEvent(update);
+        });
+    }
+}
+
+// абстрактний конструктор Форми експорту полотна
+function ExportForm(parentElem, polygons) {
+    var form = document.createElement('form');
+    var exportButton = document.createElement('button');
+    
+    exportButton.setAttribute('type', 'submit');
+    exportButton.innerHTML = "EXPORT";
+
+    form.appendChild(exportButton);
+    parentElem.appendChild(form);
+
+    form.addEventListener('submit', function(event){
+        event.preventDefault();
+        var exports = [];
+
+        if(polygons === []) {
+            polygons.forEach(polygon => {
+                exports.push(polygon.export());
+            });
+        } else {
+            throw 'Немає полігонів';
         }
+
+        console.log(exports);
     });
 }
