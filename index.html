@@ -11,6 +11,14 @@
 </body>
 <script src="main.js"></script>
 <script>
-    var svgEditor = new SVGEditor(document.querySelector('.svg-editor'));
+    var svgEditor = new SVGEditor(document.querySelector('.svg-editor'), {
+        url: 'https://www.architecturalrecord.com/ext/resources/Issues/2016/May/1605-Architecture-Creativity-wHY-Louisville-Speed-Art-Museum-01.jpg',
+        width: 900,
+        height: 500,
+        fields: [{  name: 'Поверх',
+                    attribute: 'data-floor'}, 
+                {   name: 'Cекція',
+                    attribute: 'data-section'}]
+    });
 </script>
 </html>
