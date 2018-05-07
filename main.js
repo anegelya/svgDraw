@@ -57,17 +57,16 @@ function SVGEditor(DOM, options) {
 
         } else if (event.metaKey) {
             var elem = event.target;
-            // polygon.stopDraw();
 
-            if(elem.nodeName == 'polygon') {
-                polygons.forEach(polygonElem => {
-                    if(elem.getAttribute('points') === polygonElem.getPolygonCoords()) {
-                        polygon = polygonElem;
-                        polygon.makeActive();
-                        form.setPolygonTarget(polygon);
-                    }
-                });
-            }
+            // if(elem.nodeName == 'polygon') {
+            //     polygons.forEach(polygonElem => {
+            //         if(elem.getAttribute('points') === polygonElem.getPolygonCoords()) {
+            //             polygon = polygonElem;
+            //             polygon.makeActive();
+            //             form.setPolygonTarget(polygon);
+            //         }
+            //     });
+            // }
         } else if(event.shiftKey) {
             // додаємо точку із апроксимованими кутами
             polygon.addPoint(coords, true);
@@ -86,6 +85,7 @@ function SVGEditor(DOM, options) {
             var elem = event.target;
 
             if(elem.nodeName == 'circle') {
+                
                 var coords = {
                     'x': Number(elem.getAttribute('cx')),
                     'y': Number(elem.getAttribute('cy'))
@@ -93,6 +93,21 @@ function SVGEditor(DOM, options) {
 
                 var s = polygon.searchDot(coords);
                 editablePoint = s.point;
+
+            } else if(elem.nodeName == 'polygon') {
+                var coords = {
+                    'x': event.clientX,
+                    'y': event.clientY
+                };
+
+                polygons.forEach(polygonElem => {
+                    if(elem.getAttribute('points') === polygonElem.getPolygonCoords()) {
+                        polygon = polygonElem;
+                        polygon.makeActive();
+                        polygon.pauseDrawing(true);
+                        form.setPolygonTarget(polygon);
+                    }
+                });
             }
         }
     });
@@ -168,8 +183,6 @@ function Polygon(parentElem) {
 
     var attributes = {};
 
-    var editablePoint = null;
-
     var editable = false;
 
     // додаємо полігон до батьківського елементу
@@ -215,6 +228,7 @@ function Polygon(parentElem) {
 
     this.draftPoint = function(coords, approx, index) {
         if(editable) {
+            console.log(editable);
             var polygonPoints = "";
             polygonCoords[index] = coords;
             if(dot) dot.setCoords(coords);
@@ -228,10 +242,6 @@ function Polygon(parentElem) {
             var polygonPoints = "",
                 lastPoint = polygonCoords[polygonCoords.length - 2];
 
-            if(!index) {
-                index = polygonCoords.length;
-            }
-
             if(!dot) {
                 dot = new Dot(parentElem);
             }
@@ -244,8 +254,8 @@ function Polygon(parentElem) {
                 var newCoords = approxPoint(coords, lastPoint.x, lastPoint.y);
                 dot.setCoords(newCoords);
                 polygonCoords.push(newCoords);
-            } else if(index) {
-                polygonCoords[index] = coords;
+            } else {
+                polygonCoords.push(coords);
                 dot.setCoords(coords);
             }
                 
@@ -257,9 +267,9 @@ function Polygon(parentElem) {
         }
     }
 
-    this.pauseDrawing = function() {
+    this.pauseDrawing = function(DoNotLastPoint) {
         var polygonPoints = "";
-        polygonCoords.pop();
+        if(!DoNotLastPoint) polygonCoords.pop();
         polygonCoords.forEach(elem => {
             polygonPoints += elem.x + ',' + elem.y + ' ';
         });
