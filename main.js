@@ -1,16 +1,16 @@
-// TODO:
-// FIXME: 
-// - [x] коли нажати cmd, клікнути по полігону і почати одразу рухати - то остання точка стає чорновою. 
-//       має додаватись ще одна нова чорнова точка;
+// TODO:додати Ctrl в тих місцях де metaKey на слухачах подій;
 
 // абстрактний конструктор Редактору SVG
 function SVGEditor(DOM, options) {
 
     // створюємо полотно для малювання SVG
     var canvas = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+
     canvas.style.width = options.width;
     canvas.style.height = options.height;
+
     canvas.style.background = 'url(' + options.url + ')';
+
 
     // створюємо поточний елемент, який буде малюватись
     var polygon = null;
@@ -22,6 +22,9 @@ function SVGEditor(DOM, options) {
     
     // додаємо полотно до DOM
     DOM.appendChild(canvas);
+
+    var X = canvas.getBoundingClientRect().left;
+    var Y = canvas.getBoundingClientRect().top;
 
     // створюємо нову форму дата-атрибутів
     var form = new Form(DOM, options.fields);
@@ -35,8 +38,8 @@ function SVGEditor(DOM, options) {
 
         // отримуємо координати кліку
         var coords = {
-            'x': event.clientX,
-            'y': event.clientY
+            'x': event.clientX - X,
+            'y': event.clientY - Y
         };
 
         // якщо немає поточного полігону
@@ -48,7 +51,7 @@ function SVGEditor(DOM, options) {
 
             options.fields.forEach(field => {
                 if(polygon) {
-                    polygon.editAttribute(field.attribute, '1');
+                    polygon.editAttribute(field.attribute, field.default);
                 }
             });
 
@@ -97,8 +100,8 @@ function SVGEditor(DOM, options) {
 
             } else if(elem.nodeName == 'polygon') {
                 var coords = {
-                    'x': event.clientX,
-                    'y': event.clientY
+                    'x': event.clientX - X,
+                    'y': event.clientY - Y
                 };
 
                 polygons.forEach(polygonElem => {
@@ -127,8 +130,8 @@ function SVGEditor(DOM, options) {
         event.preventDefault();
         event.stopPropagation();
         var coords = {
-            'x': event.clientX,
-            'y': event.clientY
+            'x': event.clientX - X,
+            'y': event.clientY - Y
         };
 
         if(polygon) {
@@ -163,13 +166,18 @@ function SVGEditor(DOM, options) {
         if(event.keyCode === 224 && polygon) {
             polygon.resumeDrawing();
             var coords = {
-                'x': event.clientX,
-                'y': event.clientY
+                'x': event.clientX - X,
+                'y': event.clientY - Y
             };
             polygon.addPoint(coords);
             editablePoint = null;
             DOM.classList.toggle('cursor');
         }
+    });
+
+    document.addEventListener('scroll', function(event){
+        X = canvas.getBoundingClientRect().left;
+        Y = canvas.getBoundingClientRect().top;
     });
 }
 
@@ -427,10 +435,17 @@ function Form(parentElem, fields) {
 
     fields.forEach(field => {
         var input = document.createElement('input');
+        var label = document.createElement('label');
+
         input.setAttribute('type', 'text');
         input.setAttribute('placeholder', field.name);
         input.setAttribute('id', field.attribute);
+        input.setAttribute('value', field.default);
 
+        label.setAttribute('for', field.attribute);
+        label.innerHTML = field.name;
+
+        form.appendChild(label);
         form.appendChild(input);
         fieldsArr.push(input);
 
