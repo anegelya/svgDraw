@@ -1,6 +1,7 @@
 // TODO:
-// FIXME: коли нажати cmd, клікнути по полігону і почати одразу рухати - то остання точка стає чорновою. 
-// має додаватись ще одна нова чорнова точка
+// FIXME: 
+// - [x] коли нажати cmd, клікнути по полігону і почати одразу рухати - то остання точка стає чорновою. 
+//       має додаватись ще одна нова чорнова точка;
 
 // абстрактний конструктор Редактору SVG
 function SVGEditor(DOM, options) {
@@ -228,7 +229,6 @@ function Polygon(parentElem) {
 
     this.draftPoint = function(coords, approx, index) {
         if(editable) {
-            console.log(editable);
             var polygonPoints = "";
             polygonCoords[index] = coords;
             if(dot) dot.setCoords(coords);
@@ -472,16 +472,19 @@ function ExportForm(parentElem, polygons) {
 
     form.addEventListener('submit', function(event){
         event.preventDefault();
-        var exports = [];
+        
+        var exports = {};
+        var i = 0;
 
-        if(polygons === []) {
+        if(polygons !== []) {
             polygons.forEach(polygon => {
-                exports.push(polygon.export());
+                exports[i] = polygon.export();
+                i++;
             });
         } else {
             throw 'Немає полігонів';
         }
 
-        console.log(exports);
+        console.log(JSON.stringify(exports));
     });
 }
