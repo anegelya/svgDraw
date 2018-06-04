@@ -68,8 +68,8 @@ function SVGEditor(DOM, options) {
 
         // отримуємо координати кліку
         var coords = {
-            'x': event.clientX - X,
-            'y': event.clientY - Y
+            'x': (event.clientX - X)/scale,
+            'y': (event.clientY - Y)/scale
         };
 
         // якщо немає поточного полігону
@@ -133,8 +133,8 @@ function SVGEditor(DOM, options) {
 
             } else if(elem.nodeName == 'polygon') {
                 var coords = {
-                    'x': event.clientX - X,
-                    'y': event.clientY - Y
+                    'x': (event.clientX - X)/scale,
+                    'y': (event.clientY - Y)/scale
                 };
 
                 polygons.forEach(polygonElem => {
@@ -163,8 +163,8 @@ function SVGEditor(DOM, options) {
         event.preventDefault();
         event.stopPropagation();
         var coords = {
-            'x': event.clientX - X,
-            'y': event.clientY - Y
+            'x': (event.clientX - X)/scale,
+            'y': (event.clientY - Y)/scale
         };
 
         if(polygon) {
@@ -199,8 +199,8 @@ function SVGEditor(DOM, options) {
         if(event.keyCode === 224 && polygon) {
             polygon.resumeDrawing();
             var coords = {
-                'x': event.clientX - X,
-                'y': event.clientY - Y
+                'x': (event.clientX - X)/scale,
+                'y': (event.clientY - Y)/scale
             };
             polygon.addPoint(coords);
             editablePoint = null;
@@ -242,7 +242,7 @@ function Polygon(parentElem) {
     this.getPolygonCoords = function() {
         var polygonPoints = "";
         polygonCoords.forEach(elem => {
-            polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
+            polygonPoints += elem.x + ',' + elem.y  + ' ';
         });
 
         return polygonPoints;
@@ -265,7 +265,7 @@ function Polygon(parentElem) {
         polygonCoords.push(coords);
         
         polygonCoords.forEach(elem => {
-            polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
+            polygonPoints += elem.x + ',' + elem.y  + ' ';
         });
 
         polygon.setAttribute('points', polygonPoints);
@@ -280,7 +280,7 @@ function Polygon(parentElem) {
             if(dot) dot.setCoords(coords);
 
             polygonCoords.forEach(elem => {
-                polygonPoints += elem.x/scale + ',' + elem.y/scale + ' ';
+                polygonPoints += elem.x + ',' + elem.y + ' ';
             });
 
             polygon.setAttribute('points', polygonPoints);
@@ -306,7 +306,7 @@ function Polygon(parentElem) {
             }
                 
             polygonCoords.forEach(elem => {
-                polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
+                polygonPoints += elem.x + ',' + elem.y  + ' ';
             });
 
             polygon.setAttribute('points', polygonPoints);
@@ -317,7 +317,7 @@ function Polygon(parentElem) {
         var polygonPoints = "";
         if(!DoNotLastPoint) polygonCoords.pop();
         polygonCoords.forEach(elem => {
-            polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
+            polygonPoints += elem.x + ',' + elem.y  + ' ';
         });
 
         polygon.setAttribute('points', polygonPoints);
@@ -330,7 +330,7 @@ function Polygon(parentElem) {
         var polygonPoints = "";
 
         polygonCoords.forEach(elem => {
-            polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
+            polygonPoints += elem.x + ',' + elem.y  + ' ';
         });
 
         polygon.setAttribute('points', polygonPoints);
@@ -341,7 +341,7 @@ function Polygon(parentElem) {
         var polygonPoints = "";
         polygonCoords.pop();
         polygonCoords.forEach(elem => {
-            polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
+            polygonPoints += elem.x + ',' + elem.y  + ' ';
         });
 
         polygon.setAttribute('points', polygonPoints);
@@ -395,7 +395,7 @@ function Polygon(parentElem) {
         };
 
         polygonCoords.forEach(elem => {
-            obj.attributes['points'] += elem.x/scale + ',' + elem.y/scale  + ' ';
+            obj.attributes['points'] += elem.x + ',' + elem.y  + ' ';
         });
 
         for(var attrKey in attributes) {
@@ -452,7 +452,7 @@ function Dot(parentElem) {
     var dot = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
 
     dot.setAttribute("vector-effect","non-scaling-stroke");
-    dot.setAttribute('r', 4/scale );
+    dot.setAttribute('r', 4);
     parentElem.appendChild(dot);
 
     this.getCoords = function() {
@@ -465,8 +465,8 @@ function Dot(parentElem) {
 
     this.setCoords = function(coords) {
         if(coords.x && coords.y) {
-            dot.setAttribute('cx', coords.x/scale);
-            dot.setAttribute('cy', coords.y/scale);
+            dot.setAttribute('cx', coords.x);
+            dot.setAttribute('cy', coords.y);
         }
     }
 
