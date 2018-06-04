@@ -85,8 +85,7 @@ function SVGEditor(DOM, options) {
         } else if (event.ctrlKey) {
             // do nothing
             return;
-        }
-         else {
+        } else {
             polygon.addPoint(coords);
         }
     });
