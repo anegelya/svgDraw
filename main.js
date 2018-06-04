@@ -208,6 +208,10 @@ function SVGEditor(DOM, options) {
         } else if(event.keyCode === 27 && polygon) {
             polygon.stopDraw();
             polygon = null;
+        } else if(event.keyCode === 8 && polygon) {
+            polygons.pop();
+            polygon.remove();
+            polygon = null;
         }
     });
 
@@ -347,6 +351,13 @@ function Polygon(parentElem) {
         polygon.setAttribute('points', polygonPoints);
         polygon.style.opacity = '0.4';
         dot.delete();
+    }
+
+    this.remove = function() {
+        dots.forEach(dot =>{
+            dot.delete();
+        });
+        polygon.remove();
     }
 
     this.makeActive = function() {
