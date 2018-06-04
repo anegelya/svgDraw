@@ -3,7 +3,6 @@
 // TODO: зробити обирання полігону при кліку лівою клавішою по полігону.
 //       якщо це полігон, то робимо активним. якщо ні - то створюємо новий полігон;
 // TODO: додати завершення полігону при кліку на Esc (keyCode = 27);
-// TODO: передати урл для відправки форми експорту в опшинс конструктора;
 // TODO: додати до свг конструктора метод для експорту;
 // FIXME: полагодити поведінку полігонів при кліку на Ctrl
 
@@ -182,6 +181,9 @@ function SVGEditor(DOM, options) {
             polygon.addPoint(coords);
             editablePoint = null;
             DOM.classList.toggle('cursor');
+        } else if(event.keyCode === 27 && polygon) {
+            polygon.stopDraw();
+            polygon = null;
         }
     });
 
