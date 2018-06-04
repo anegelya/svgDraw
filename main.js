@@ -40,7 +40,7 @@ function SVGEditor(DOM, options) {
     var exportForm = new ExportForm(DOM, polygons, {
         width: options.width,
         height: options.height
-    });
+    }, options.sendTo);
 
     // додаємо слухач на клік
     canvas.addEventListener('click', function(event) {
@@ -496,7 +496,7 @@ function Form(parentElem, fields) {
 }
 
 // абстрактний конструктор Форми експорту полотна
-function ExportForm(parentElem, polygons, svgOptions) {
+function ExportForm(parentElem, polygons, svgOptions, sendTo) {
     var _this = this;
     var form = document.createElement('form');
     var exportButton = document.createElement('button');
@@ -543,5 +543,20 @@ function ExportForm(parentElem, polygons, svgOptions) {
 
     this.sendForm = function(exportObj) {
         console.log(JSON.stringify(exportObj));
+
+        var form, xhr;
+        form = new FormData();
+        form.append("svg", JSON.stringify(exportObj));
+        xhr = new XMLHttpRequest();
+        xhr.open('POST', sendTo);
+        xhr.onload = function() {
+            if (this.readyState === 4 && this.status === 200) {
+                // location.reload();
+                console.log('SVG sent to '+sendTo);
+            } else {
+                console.log(this.responseText);
+            }
+        };
+        return xhr.send(form);
     }
 }
