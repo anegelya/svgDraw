@@ -1,4 +1,11 @@
-// TODO:додати Ctrl в тих місцях де metaKey на слухачах подій;
+// TODO: додати Ctrl в тих місцях де metaKey на слухачах подій;
+// TODO: показувати поля форми лише після створення першого полігону;
+// TODO: зробити обирання полігону при кліку лівою клавішою по полігону.
+//       якщо це полігон, то робимо активним. якщо ні - то створюємо новий полігон;
+// TODO: додати завершення полігону при кліку на Esc (keyCode = 27);
+// TODO: передати урл для відправки форми експорту в опшинс конструктора;
+// TODO: додати до свг конструктора метод для експорту;
+// FIXME: полагодити поведінку полігонів при кліку на Ctrl
 
 // абстрактний конструктор Редактору SVG
 function SVGEditor(DOM, options) {
@@ -30,7 +37,10 @@ function SVGEditor(DOM, options) {
     var form = new Form(DOM, options.fields);
 
     // створюємо форму експорту полотна
-    var exportForm = new ExportForm(DOM, polygons);
+    var exportForm = new ExportForm(DOM, polygons, {
+        width: options.width,
+        height: options.height
+    });
 
     // додаємо слухач на клік
     canvas.addEventListener('click', function(event) {
@@ -348,10 +358,21 @@ function Polygon(parentElem) {
     }
 
     this.export = function() {
-        var obj = {};
+        var obj = {
+            tag: 'polygon',
+            attributes: {
+                class: 'polygon',
+                points: ''
+            }
+        };
 
-        obj.coords = polygonCoords;
-        obj.attributes = attributes;
+        polygonCoords.forEach(elem => {
+            obj.attributes['points'] += elem.x + ',' + elem.y + ' ';
+        });
+
+        for(var attrKey in attributes) {
+            obj.attributes[attrKey] = attributes[attrKey];
+        }
 
         return obj;
     }
@@ -475,7 +496,8 @@ function Form(parentElem, fields) {
 }
 
 // абстрактний конструктор Форми експорту полотна
-function ExportForm(parentElem, polygons) {
+function ExportForm(parentElem, polygons, svgOptions) {
+    var _this = this;
     var form = document.createElement('form');
     var exportButton = document.createElement('button');
     
@@ -487,19 +509,39 @@ function ExportForm(parentElem, polygons) {
 
     form.addEventListener('submit', function(event){
         event.preventDefault();
-        
-        var exports = {};
-        var i = 0;
+        var exports = composeExports();
+        _this.sendForm(exports);
+    });
+
+    function composeExports() {
+        var exports = {
+            tag: 'svg',
+            attributes: {
+                version: '1.1',
+                x: '0px',
+                y: '0px',
+                width: svgOptions.width+'px',
+                height: svgOptions.height+'px',
+                viewBox: '0 0 '+svgOptions.width+' '+svgOptions.height,
+                style: 'enable-background:new 0 0 '+svgOptions.width+' '+svgOptions.height
+            },
+            children: []
+        };
 
         if(polygons !== []) {
             polygons.forEach(polygon => {
-                exports[i] = polygon.export();
-                i++;
+                var svgChild = polygon.export();
+
+
+                exports.children.push(svgChild);
             });
         } else {
             throw 'Немає полігонів';
         }
+        return exports;
+    }
 
-        console.log(JSON.stringify(exports));
-    });
+    this.sendForm = function(exportObj) {
+        console.log(JSON.stringify(exportObj));
+    }
 }
