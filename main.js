@@ -28,21 +28,25 @@ function SVGEditor(DOM, options) {
     // додаємо полотно до DOM
     DOM.appendChild(canvas);
 
+    var form, exportForm;
+
     var X = canvas.getBoundingClientRect().left;
     var Y = canvas.getBoundingClientRect().top;
-
-    // створюємо нову форму дата-атрибутів
-    var form = new Form(DOM, options.fields);
-
-    // створюємо форму експорту полотна
-    var exportForm = new ExportForm(DOM, polygons, {
-        width: options.width,
-        height: options.height
-    }, options.sendTo);
 
     // додаємо слухач на клік
     canvas.addEventListener('click', function(event) {
         event.stopPropagation();
+
+        if(!form || !exportForm) {
+            // створюємо нову форму дата-атрибутів
+            form = new Form(DOM, options.fields);
+
+            // створюємо форму експорту полотна
+            exportForm = new ExportForm(DOM, polygons, {
+                width: options.width,
+                height: options.height
+            }, options.sendTo);
+        }
 
         // отримуємо координати кліку
         var coords = {
