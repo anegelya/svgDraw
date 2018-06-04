@@ -6,15 +6,33 @@
 // FIXME: полагодити поведінку полігонів при кліку на Ctrl
 
 // абстрактний конструктор Редактору SVG
+
+var scale;
+var fileName;
+
 function SVGEditor(DOM, options) {
 
     // створюємо полотно для малювання SVG
     var canvas = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
 
-    canvas.style.width = options.width;
-    canvas.style.height = options.height;
 
-    canvas.style.background = 'url(' + options.url + ')';
+    
+    var wScale = window.innerWidth/options.width;
+    var hScale = window.innerHeight/options.height;
+    scale = wScale < hScale ? wScale : hScale;
+    
+    canvas.setAttribute('width', options.width*scale + "px");
+    canvas.setAttribute('height', options.height*scale + "px");
+    canvas.setAttribute('viewBox', '0 0 ' + options.width + ' ' + options.height);
+    
+    
+    console.log(scale);
+    
+
+    
+
+    fileName = options.fileName;
+    canvas.style.backgroundImage = 'url(' + options.url + ')';
 
 
     // створюємо поточний елемент, який буде малюватись
@@ -45,7 +63,7 @@ function SVGEditor(DOM, options) {
             exportForm = new ExportForm(DOM, polygons, {
                 width: options.width,
                 height: options.height
-            }, options.sendTo);
+            }, options.sendTo, options.onSvgSent);
         }
 
         // отримуємо координати кліку
@@ -203,6 +221,8 @@ function SVGEditor(DOM, options) {
 function Polygon(parentElem) {
     // створюємо SVG полігону
     var polygon = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+    
+    polygon.setAttribute("vector-effect","non-scaling-stroke");
     polygon.style.opacity = '0.8';
     
     // створюємо масив із координатами точок полігону;
@@ -222,7 +242,7 @@ function Polygon(parentElem) {
     this.getPolygonCoords = function() {
         var polygonPoints = "";
         polygonCoords.forEach(elem => {
-            polygonPoints += elem.x + ',' + elem.y + ' ';
+            polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
         });
 
         return polygonPoints;
@@ -245,7 +265,7 @@ function Polygon(parentElem) {
         polygonCoords.push(coords);
         
         polygonCoords.forEach(elem => {
-            polygonPoints += elem.x + ',' + elem.y + ' ';
+            polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
         });
 
         polygon.setAttribute('points', polygonPoints);
@@ -260,7 +280,7 @@ function Polygon(parentElem) {
             if(dot) dot.setCoords(coords);
 
             polygonCoords.forEach(elem => {
-                polygonPoints += elem.x + ',' + elem.y + ' ';
+                polygonPoints += elem.x/scale + ',' + elem.y/scale + ' ';
             });
 
             polygon.setAttribute('points', polygonPoints);
@@ -286,7 +306,7 @@ function Polygon(parentElem) {
             }
                 
             polygonCoords.forEach(elem => {
-                polygonPoints += elem.x + ',' + elem.y + ' ';
+                polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
             });
 
             polygon.setAttribute('points', polygonPoints);
@@ -297,7 +317,7 @@ function Polygon(parentElem) {
         var polygonPoints = "";
         if(!DoNotLastPoint) polygonCoords.pop();
         polygonCoords.forEach(elem => {
-            polygonPoints += elem.x + ',' + elem.y + ' ';
+            polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
         });
 
         polygon.setAttribute('points', polygonPoints);
@@ -310,7 +330,7 @@ function Polygon(parentElem) {
         var polygonPoints = "";
 
         polygonCoords.forEach(elem => {
-            polygonPoints += elem.x + ',' + elem.y + ' ';
+            polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
         });
 
         polygon.setAttribute('points', polygonPoints);
@@ -321,7 +341,7 @@ function Polygon(parentElem) {
         var polygonPoints = "";
         polygonCoords.pop();
         polygonCoords.forEach(elem => {
-            polygonPoints += elem.x + ',' + elem.y + ' ';
+            polygonPoints += elem.x/scale + ',' + elem.y/scale  + ' ';
         });
 
         polygon.setAttribute('points', polygonPoints);
@@ -375,7 +395,7 @@ function Polygon(parentElem) {
         };
 
         polygonCoords.forEach(elem => {
-            obj.attributes['points'] += elem.x + ',' + elem.y + ' ';
+            obj.attributes['points'] += elem.x/scale + ',' + elem.y/scale  + ' ';
         });
 
         for(var attrKey in attributes) {
@@ -430,7 +450,9 @@ function Polygon(parentElem) {
 // абстрактний конструктор Точки
 function Dot(parentElem) {
     var dot = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
-    dot.setAttribute('r', "4");
+
+    dot.setAttribute("vector-effect","non-scaling-stroke");
+    dot.setAttribute('r', 4/scale );
     parentElem.appendChild(dot);
 
     this.getCoords = function() {
@@ -443,8 +465,8 @@ function Dot(parentElem) {
 
     this.setCoords = function(coords) {
         if(coords.x && coords.y) {
-            dot.setAttribute('cx', coords.x);
-            dot.setAttribute('cy', coords.y);
+            dot.setAttribute('cx', coords.x/scale);
+            dot.setAttribute('cy', coords.y/scale);
         }
     }
 
@@ -504,13 +526,14 @@ function Form(parentElem, fields) {
 }
 
 // абстрактний конструктор Форми експорту полотна
-function ExportForm(parentElem, polygons, svgOptions, sendTo) {
+function ExportForm(parentElem, polygons, svgOptions, sendTo, onSvgSent) {
     var _this = this;
     var form = document.createElement('form');
     var exportButton = document.createElement('button');
     
     exportButton.setAttribute('type', 'submit');
     exportButton.innerHTML = "EXPORT";
+    exportButton.classList = 'btn btn-success';
 
     form.appendChild(exportButton);
     parentElem.appendChild(form);
@@ -550,17 +573,16 @@ function ExportForm(parentElem, polygons, svgOptions, sendTo) {
     }
 
     this.sendForm = function(exportObj) {
-        console.log(JSON.stringify(exportObj));
 
         var form, xhr;
         form = new FormData();
         form.append("svg", JSON.stringify(exportObj));
+        form.append("filename", fileName);
         xhr = new XMLHttpRequest();
         xhr.open('POST', sendTo);
         xhr.onload = function() {
             if (this.readyState === 4 && this.status === 200) {
-                // location.reload();
-                console.log('SVG sent to '+sendTo);
+                onSvgSent(this.responseText);
             } else {
                 console.log(this.responseText);
             }
@@ -568,3 +590,4 @@ function ExportForm(parentElem, polygons, svgOptions, sendTo) {
         return xhr.send(form);
     }
 }
+
