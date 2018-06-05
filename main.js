@@ -1,9 +1,7 @@
 // TODO: додати Ctrl в тих місцях де metaKey на слухачах подій;
-// TODO: показувати поля форми лише після створення першого полігону;
 // TODO: зробити обирання полігону при кліку лівою клавішою по полігону.
 //       якщо це полігон, то робимо активним. якщо ні - то створюємо новий полігон;
 // TODO: додати до свг конструктора метод для експорту;
-// FIXME: полагодити поведінку полігонів при кліку на Ctrl
 
 // абстрактний конструктор Редактору SVG
 
@@ -240,7 +238,7 @@ function Polygon(parentElem) {
     parentElem.appendChild(polygon);
 
     var dots = [];
-    var dot = new Dot(parentElem);
+    var dot = new Dot(parentElem, scale);
     // dots.push(dot);
 
     this.getPolygonCoords = function() {
@@ -256,7 +254,7 @@ function Polygon(parentElem) {
         var polygonPoints = "",
             lastPoint = polygonCoords[polygonCoords.length - 2];
 
-        var dot = new Dot(parentElem);
+        var dot = new Dot(parentElem, scale);
         dots.push(dot);
 
         if(options) {
@@ -293,7 +291,7 @@ function Polygon(parentElem) {
                 lastPoint = polygonCoords[polygonCoords.length - 2];
 
             if(!dot) {
-                dot = new Dot(parentElem);
+                dot = new Dot(parentElem, scale);
             }
         
             if(polygonCoords.length > 1)  {
@@ -330,7 +328,7 @@ function Polygon(parentElem) {
     }
 
     this.resumeDrawing = function() {
-        dot = new Dot(parentElem);
+        dot = new Dot(parentElem, scale);
         var polygonPoints = "";
 
         polygonCoords.forEach(elem => {
@@ -459,11 +457,11 @@ function Polygon(parentElem) {
 }
 
 // абстрактний конструктор Точки
-function Dot(parentElem) {
+function Dot(parentElem, scale) {
     var dot = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
 
     dot.setAttribute("vector-effect","non-scaling-stroke");
-    dot.setAttribute('r', 4);
+    dot.setAttribute('r', 4/scale);
     parentElem.appendChild(dot);
 
     this.getCoords = function() {
