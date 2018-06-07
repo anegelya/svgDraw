@@ -185,7 +185,6 @@ function SVGEditor(DOM, options) {
     });
 
     document.addEventListener('keydown', function(event) {
-        event.preventDefault();
         if(event.keyCode ==90 && event.metaKey) {
             console.log("Відміна");
         } else if (event.keyCode === 224) {
@@ -195,7 +194,6 @@ function SVGEditor(DOM, options) {
     });
 
     document.addEventListener('keyup', function(event){
-        event.preventDefault();
         if(event.keyCode === 224 && polygon) {
             polygon.resumeDrawing();
             var coords = {
@@ -343,17 +341,14 @@ function Polygon(parentElem) {
 
     this.stopDraw = function() {
         var polygonPoints = "";
-        if(!editable)
-            polygonCoords.pop();
+        polygonCoords.pop();
         polygonCoords.forEach(elem => {
             polygonPoints += elem.x + ',' + elem.y  + ' ';
         });
 
         polygon.setAttribute('points', polygonPoints);
         polygon.style.opacity = '0.4';
-        
-        if(!editable)
-            dot.delete();
+        dot.delete();
     }
 
     this.remove = function() {
